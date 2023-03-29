@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+    environment {
+      DOCKERHUB_CREDENTIALS = credentials('docker-cred')
+	  }
+    tools{ 
+        maven 'maven'
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkins_prv', url: 'git@github.com:RajeshAlli/Mallesh-create-task.git']])
+            }
+        }
+    stage('maven-build') {
+            steps {
+            sh '''
+            cd $WORKSPACE/springboot/java-springboot
+            mvn clean package
+            '''
+            }
+        }
+    stage('nexus-integration') {
+            steps {
+              nexusArtifactUploader artifacts: [[artifactId: 'springboot-backend', classifier: '', file: 'springboot/java-springboot/target/springboot-backend-0.0.1-SNAPSHOT.jar', type: 'jar']], credentialsId: 'nexus-cred', groupId: 'springboot-backend', nexusUrl: '107.22.80.189:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'maven', version: '0.0.1-SNAPSHOT'
+            }
+        }
+    stage('sonar') {
+            steps {
+                sh '''
+                cd $WORKSPACE/springboot/java-springboot 
+                mvn clean verify sonar:sonar \
+                   -Dsonar.projectKey=java-project \
+                   -Dsonar.host.url=http://54.83.112.185:9000 \
+                   -Dsonar.login=sqp_d685e1dabeb805b152dea4ed901a059c4809f031 
+              '''
+            }
+        }
+    stage('Docker-build-spring') {
+           steps {
+             sh '''
+			 cd $WORKSPACE/springboot/java-springboot
+             echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
+             docker build -t allirajesh/rajesh:spring-v1 $WORKSPACE/springboot/java-springboot/.
+             docker image prune -f 
+             '''
+           }
+        }
+    stage('Docker-build-react') {
+           steps {
+             sh '''
+			 cd $WORKSPACE/react-frontend
+             echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
+             docker build -t allirajesh/rajesh-react:reactjs-v1 $WORKSPACE/react-frontend/.
+             docker image prune -f 
+             '''
+           }
+        }
+    stage('Docker-push') {
+           steps {
+             sh '''
+                docker push allirajesh/rajesh:spring-v1 
+                docker push allirajesh/rajesh-react:reactjs-v1
+             '''
+           }
+        }
+    }
+}
