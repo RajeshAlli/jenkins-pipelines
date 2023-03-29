@@ -32,7 +32,7 @@ pipeline {
                 sh '''cd $WORKSPACE
                       helm upgrade --install devops-mariadb mariadb --values mariadb/createat-mariadb.yaml
 					  helm status devops-mariadb
-					  if [ $? == 0 ]
+					  if  $? == 0 ]
 					  then
 					    echo "mariadb installed"
 					  else
