@@ -1,0 +1,10 @@
+mkidir rajesh
+git init
+git clone url
+cat file.txt
+vi file.txt
+git add file.txt
+git commit -m "rajesh"
+git push -u origin branchname
+
+----------

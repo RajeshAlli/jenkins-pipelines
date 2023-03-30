@@ -1,0 +1,11 @@
+kubectl get nodes
+kubectl get pods
+kubectl get ns
+kubectl create namespace namespacename
+kubectl create -f deployment <filename>
+kubctl create -f deplyment <deploymentname> --image=nginx
+kubectl describe deployment <deploymentname> -n namespacename
+kubectl scale deployment deploymentname --replicas=3
+kubectl api-resources
+kubectl cluster-info
+kubectl exec -it deploymentname /bin/sh
