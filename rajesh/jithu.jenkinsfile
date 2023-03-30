@@ -1,0 +1,104 @@
+@Library('trax-shared-lib') _
+
+pipeline {
+  agent {
+    kubernetes(k8s.agent {
+      k8s(cpus: 1)
+      maven(jdk: 17, cpus: 61)
+      kubeLinter()
+      yq()
+    })
+  }
+  options {
+    
+    disableConcurrentBuilds()
+    timestamps()
+    parallelsAlwaysFailFast()
+  }
+  stages {
+    stage('Check') {
+      stages {
+        stage('CheckStyle') {
+          steps {
+            container('maven') {
+              sh """
+              chmod +x ./gradlew
+                ./gradlew checkstylemain
+              """
+            }
+          }
+        }
+        stage('Spotbugs') {
+          steps {
+            container('maven') {
+              sh """
+              ./gradlew spotbugsmain
+                """
+            }
+          }
+        }
+        stage('Junit Test') {
+          steps {
+            container('maven') {
+              sh """
+              ./gradlew test
+                """
+            }
+          }
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        container('maven') {
+          sh """
+          ./gradlew bootJar
+            """
+        }
+      }
+    }
+
+    stage('Code') {
+      when {
+        expression {
+          !sonarQubeDisabled()
+        }
+      }
+      stages {
+        stage('Wait for coverage') {
+          steps {
+            echo """
+            Description: Waiting for the 'Coverage' and 'Format tests' stages to complete to gather coverage data
+            """
+            timeout(time: 45, unit: 'MINUTES') {
+              sh 'while  [ ! -f  coverage_done ]; do sleep 5; done'
+            }
+          }
+        }
+        stage('SonarQube') {
+          steps {
+            container("maven") {
+              echo """
+                Description : SonarQube Analysis on sonarqube.fis.dev
+                Results: https: //sonarqube.fis.dev/dashboard?branch=${BRANCH_NAME}&id=Trax"""
+                script {
+                  credentials.sonar {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                      sh """
+                      gradle sonar -Dsonar.projectKey=Trax -Dsonar.branch.name=$BRANCH_NAME -Dsonar.projectName=Trax -Dsonar.host.url=https://urldefense.com/v3/__https://sonarqube.fis.dev__;!!GF_29dbcQIUBPA!11fKfV2i_aLd_hOJyijLSX_1E0TM0JcqLqXsM90-anab7dTHwMDVY1_vsC6sjr2PlngLz00ZvtkFoir25KipL_y7yk0-yzxdTptcWg$ [sonarqube[.]fis[.]dev] -Dsonar.login=$TOKEN -Dsonar.findbugs.timeout=3600000 -Dsonar.ws.timeout=600
+                        """
+                    }
+                  }
+                }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+def sonarQubeDisabled() {
+    env.BRANCH_NAME != 'master'
+}
