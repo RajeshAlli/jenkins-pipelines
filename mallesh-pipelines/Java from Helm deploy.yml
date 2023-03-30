@@ -1,0 +1,371 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubernetes.io/psp: eks.privileged
+  creationTimestamp: "2023-03-28T08:16:34Z"
+  generateName: rajesh-java-java-springboot-bb4467994-
+  labels:
+    app.kubernetes.io/instance: rajesh-java
+    app.kubernetes.io/name: springboot
+    pod-template-hash: bb4467994
+  name: rajesh-java-java-springboot-bb4467994-7fk8d
+  namespace: java
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: rajesh-java-java-springboot-bb4467994
+    uid: 4513e803-8a5b-432e-80f0-40ddb543ca4c
+  resourceVersion: "166692"
+  uid: d8aeb121-561b-4090-ba8e-5183bfec3a5b
+spec:
+  containers:
+  - image: allirajesh/rajesh:spring-v1
+    imagePullPolicy: Always
+    livenessProbe:
+      failureThreshold: 3
+      periodSeconds: 10
+      successThreshold: 1
+      tcpSocket:
+        port: http
+      timeoutSeconds: 1
+    name: springboot
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      periodSeconds: 10
+      successThreshold: 1
+      tcpSocket:
+        port: http
+      timeoutSeconds: 1
+    resources: {}
+    securityContext: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /application.properties
+      name: spring-config
+      subPath: application.properties
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-wcf7n
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: ip-10-0-2-22.ec2.internal
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: rajesh-java-springboot
+  serviceAccountName: rajesh-java-springboot
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      name: rajesh-java-configmap
+    name: spring-config
+  - name: kube-api-access-wcf7n
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-28T08:16:34Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-28T08:16:54Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-28T08:16:54Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-28T08:16:34Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://5099050a4f1a81b3c440e47ec983a3a67b190e00fbb7c1cf329399036fe2bbe2
+    image: allirajesh/rajesh:spring-v1
+    imageID: docker-pullable://allirajesh/rajesh@sha256:d7b2c20077bb9f620fdaaa08558954ce86e8adfd31b1ecdd724ba72d923c6548
+    lastState: {}
+    name: springboot
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-03-28T08:16:39Z"
+  hostIP: 10.0.2.22
+  phase: Running
+  podIP: 10.0.2.86
+  podIPs:
+  - ip: 10.0.2.86
+  qosClass: BestEffort
+  startTime: "2023-03-28T08:16:34Z"
+
+  ---
+  apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: rajesh-java
+    meta.helm.sh/release-namespace: java
+  creationTimestamp: "2023-03-28T08:16:33Z"
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app.kubernetes.io/instance: rajesh-java
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: springboot
+    app.kubernetes.io/version: 1.16.0
+    helm.sh/chart: springboot-0.1.0
+  name: java-springboot-svc
+  namespace: java
+  resourceVersion: "166618"
+  uid: 33fa0348-fa86-4de1-bf48-cfdbd7911d1f
+spec:
+  clusterIP: 172.20.139.39
+  clusterIPs:
+  - 172.20.139.39
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    nodePort: 31655
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/instance: rajesh-java
+    app.kubernetes.io/name: springboot
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - hostname: a33fa0348fa864de1bf48cfdbd7911d1-549876022.us-east-1.elb.amazonaws.com
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: rajesh-java
+    meta.helm.sh/release-namespace: java
+  creationTimestamp: "2023-03-28T08:16:33Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: rajesh-java
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: springboot
+    app.kubernetes.io/version: 1.16.0
+    helm.sh/chart: springboot-0.1.0
+  name: rajesh-java-java-springboot
+  namespace: java
+  resourceVersion: "166696"
+  uid: b887bed9-ab96-4446-a70e-e4c4bb4cea22
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: rajesh-java
+      app.kubernetes.io/name: springboot
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: rajesh-java
+        app.kubernetes.io/name: springboot
+    spec:
+      containers:
+      - image: allirajesh/rajesh:spring-v1
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 1
+        name: springboot
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 1
+        resources: {}
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /application.properties
+          name: spring-config
+          subPath: application.properties
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: rajesh-java-springboot
+      serviceAccountName: rajesh-java-springboot
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: rajesh-java-configmap
+        name: spring-config
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2023-03-28T08:16:54Z"
+    lastUpdateTime: "2023-03-28T08:16:54Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2023-03-28T08:16:34Z"
+    lastUpdateTime: "2023-03-28T08:16:54Z"
+    message: ReplicaSet "rajesh-java-java-springboot-bb4467994" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
+  ---
+  apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  annotations:
+    deployment.kubernetes.io/desired-replicas: "1"
+    deployment.kubernetes.io/max-replicas: "2"
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: rajesh-java
+    meta.helm.sh/release-namespace: java
+  creationTimestamp: "2023-03-28T08:16:34Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: rajesh-java
+    app.kubernetes.io/name: springboot
+    pod-template-hash: bb4467994
+  name: rajesh-java-java-springboot-bb4467994
+  namespace: java
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Deployment
+    name: rajesh-java-java-springboot
+    uid: b887bed9-ab96-4446-a70e-e4c4bb4cea22
+  resourceVersion: "166694"
+  uid: 4513e803-8a5b-432e-80f0-40ddb543ca4c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: rajesh-java
+      app.kubernetes.io/name: springboot
+      pod-template-hash: bb4467994
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: rajesh-java
+        app.kubernetes.io/name: springboot
+        pod-template-hash: bb4467994
+    spec:
+      containers:
+      - image: allirajesh/rajesh:spring-v1
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 1
+        name: springboot
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 1
+        resources: {}
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /application.properties
+          name: spring-config
+          subPath: application.properties
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: rajesh-java-springboot
+      serviceAccountName: rajesh-java-springboot
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: rajesh-java-configmap
+        name: spring-config
+status:
+  availableReplicas: 1
+  fullyLabeledReplicas: 1
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
