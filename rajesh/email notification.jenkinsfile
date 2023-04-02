@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+    stages {
+        stage('Hello') {
+            steps {
+                sh "echo 'Hello world,1' >> test.csv"
+                    }
+            }
+    }
+        post {
+            always{
+                archiveArtifacts artifacts: '*.csv', onlyIfSuccessful: true
+                
+                emailext to: "<enter your email address here >, allirajeshmech@gmail.com",
+                subject: "jenkins build:${currentBuild.currentResult}: ${env.JOB_NAME}",
+                body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nMore Info can be found here: ${env.BUILD_URL}",
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                attachmentsPattern: '*.csv',
+				attachLog: true
+                
+            cleanWs()
+            }
+        }
+}
